@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        - VITE_OPENWEATHER_API_KEY=3e80b4c57b3efeef93a82f6f06d4f1df
+    ports:
+      - "8080:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_OPENWEATHER_API_KEY=3e80b4c57b3efeef93a82f6f06d4f1df
+      - VITE_BASE_URL=https://api.openweathermap.org/data/2.5
+    command: yarn dev --host
