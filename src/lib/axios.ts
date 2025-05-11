@@ -1,10 +1,13 @@
+import { getSecureApiKey, validateApiKey } from '@/config/api-security';
 import env from '@/config/env';
 import axios from 'axios';
+
+validateApiKey();
 
 const apiClient = axios.create({
   baseURL: env.BASE_URL,
   params: {
-    appid: env.OPENWEATHER_API_KEY,
+    appid: getSecureApiKey(),
     units: 'metric',
   },
 });

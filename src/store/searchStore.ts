@@ -1,6 +1,7 @@
-import _ from "lodash";
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { secureLocalStorage } from '@/lib/secureStorage';
+import _ from 'lodash';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface SearchHistoryState {
   history: string[];
@@ -11,15 +12,15 @@ interface SearchHistoryState {
 
 export const useSearchHistoryStore = create<SearchHistoryState>()(
   persist(
-    (set) => ({
+    set => ({
       history: [],
 
       addToHistory: (city: string) =>
-        set((state) => {
+        set(state => {
           // Remove duplicates and add to the beginning
           const filteredHistory = _.filter(
             state.history,
-            (item) => !_.isEqual(item.toLowerCase(), city.toLowerCase())
+            item => !_.isEqual(item.toLowerCase(), city.toLowerCase())
           );
           return {
             history: _.take([city, ...filteredHistory], 10), // Keep only 10 recent searches using lodash
@@ -27,17 +28,19 @@ export const useSearchHistoryStore = create<SearchHistoryState>()(
         }),
 
       removeFromHistory: (city: string) =>
-        set((state) => ({
+        set(state => ({
           history: _.filter(
             state.history,
-            (item) => !_.isEqual(item.toLowerCase(), city.toLowerCase())
+            item => !_.isEqual(item.toLowerCase(), city.toLowerCase())
           ),
         })),
 
       clearHistory: () => set({ history: [] }),
     }),
     {
-      name: "search-history",
+      name: 'search-history',
+      // Use our custom secure storage to encrypt/decrypt data
+      storage: createJSONStorage(() => secureLocalStorage),
     }
   )
 );

@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { createContext, useContext, useState } from "react";
+import type { ReactNode } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 type ModalType = {
   component: ReactNode;
@@ -20,13 +20,35 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const showModal = (component: ReactNode, props?: Record<string, unknown>) => {
-    setCurrent({ component, props });
-    setIsOpen(true);
+    if (isOpen) {
+      setIsOpen(false);
+      setTimeout(() => {
+        setCurrent({ component, props });
+        setIsOpen(true);
+      }, 300);
+    } else {
+      setCurrent({ component, props });
+      setIsOpen(true);
+    }
   };
 
   const hideModal = () => {
     setIsOpen(false);
-    setTimeout(() => setCurrent(null), 300); // After animation
+    setTimeout(() => setCurrent(null), 300);
+  };
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    // Ensure that we only close if clicking directly on the backdrop
+    if (e.target === e.currentTarget) {
+      e.preventDefault();
+      e.stopPropagation();
+      hideModal();
+    }
+  };
+
+  const handleContentClick = (e: React.MouseEvent) => {
+    // Stop event propagation to prevent it from reaching the backdrop
+    e.stopPropagation();
   };
 
   return (
@@ -35,10 +57,14 @@ export function ModalProvider({ children }: { children: ReactNode }) {
       {current && (
         <div
           className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity ${
-            isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
+          onClick={handleBackdropClick}
         >
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-auto">
+          <div
+            className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-auto"
+            onClick={handleContentClick}
+          >
             {current.component}
           </div>
         </div>
@@ -50,7 +76,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
 export const useModal = () => {
   const context = useContext(ModalContext);
   if (!context) {
-    throw new Error("useModal must be used within a ModalProvider");
+    throw new Error('useModal must be used within a ModalProvider');
   }
   return context;
 };

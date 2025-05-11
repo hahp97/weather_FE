@@ -14,8 +14,8 @@ RUN yarn install --frozen-lockfile
 # Copy source files
 COPY . .
 
-# Use OpenWeather API key from build arg
-ARG VITE_OPENWEATHER_API_KEY=3e80b4c57b3efeef93a82f6f06d4f1df
+# Set environment variables from build args (without default values)
+ARG VITE_OPENWEATHER_API_KEY
 ENV VITE_OPENWEATHER_API_KEY=${VITE_OPENWEATHER_API_KEY}
 ENV VITE_BASE_URL=https://api.openweathermap.org/data/2.5
 
@@ -36,4 +36,4 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"] 
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,20 +1,31 @@
-import { ReactNode } from "react";
-import { Header } from "./Header";
+import { Footer } from '@/components/layout/Footer';
+import { cn } from '@/utils/cn';
+import { ReactNode } from 'react';
+import { Header } from './Header';
 
 interface LayoutProps {
+  fullWidth?: boolean;
   children: ReactNode;
+  className?: string;
 }
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, fullWidth = false, className }: LayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div
+      className={cn(
+        'relative flex flex-col min-h-screen w-full bg-gradient-to-br from-blue-50 to-gray-100',
+        className
+      )}
+    >
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-6">{children}</main>
-      <footer className="border-t py-4">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>Weather data provided by OpenWeather API</p>
+      <main className="flex-1 overflow-auto w-full">
+        <div
+          className={cn(fullWidth ? 'w-full' : 'max-w-4xl mx-auto', 'px-4 sm:px-6 py-4 md:py-6')}
+        >
+          {children}
         </div>
-      </footer>
+      </main>
+      <Footer />
     </div>
   );
 }

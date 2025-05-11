@@ -6,30 +6,37 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}Starting Weather Application Setup...${NC}"
+MODE=${1:-dev}  # Default to dev mode if no argument provided
 
-# Check if .env.local file exists, create if it doesn't
-if [ ! -f .env.local ]; then
-  echo -e "${YELLOW}Creating .env.local file...${NC}"
-  echo "VITE_OPENWEATHER_API_KEY=3e80b4c57b3efeef93a82f6f06d4f1df" > .env.local
-  echo "VITE_BASE_URL=https://api.openweathermap.org/data/2.5" >> .env.local
-  echo -e "${GREEN}Environment file created!${NC}"
+echo -e "${GREEN}Starting Weather Application in ${YELLOW}${MODE}${GREEN} mode...${NC}"
+
+# Check if .env file exists
+if [ ! -f .env ]; then
+  echo -e "${RED}Error: .env file not found!${NC}"
+  echo -e "${YELLOW}Please create a .env file with your OpenWeather API key:${NC}"
+  echo -e "${YELLOW}OPENWEATHER_API_KEY=your_api_key_here${NC}"
+  exit 1
+fi
+
+# Source the .env file to load environment variables
+source .env
+
+# Check if the API key is set
+if [ -z "$OPENWEATHER_API_KEY" ]; then
+  echo -e "${RED}Error: OPENWEATHER_API_KEY is not set in .env file!${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}Using Docker Compose to start the application...${NC}"
+
+if [ "$MODE" == "prod" ]; then
+  echo -e "${GREEN}Starting production environment...${NC}"
+  docker-compose up --build app
+elif [ "$MODE" == "dev" ]; then
+  echo -e "${GREEN}Starting development environment...${NC}"
+  docker-compose up --build dev
 else
-  echo -e "${GREEN}Environment file already exists.${NC}"
+  echo -e "${RED}Invalid mode: ${MODE}${NC}"
+  echo -e "${YELLOW}Valid options are: dev, prod${NC}"
+  exit 1
 fi
-
-# Remove problematic tsconfig file
-if [ -f tsconfig.app.json ]; then
-  echo -e "${YELLOW}Removing problematic TypeScript config file...${NC}"
-  rm tsconfig.app.json
-fi
-
-# Make sure we are using the latest packages
-echo -e "${GREEN}Installing dependencies...${NC}"
-yarn install
-
-# Run development server
-echo -e "${GREEN}Starting development server...${NC}"
-echo -e "${YELLOW}You can access the application at http://localhost:5173${NC}"
-echo -e "${YELLOW}Press Ctrl+C to stop the server${NC}"
-yarn dev 
